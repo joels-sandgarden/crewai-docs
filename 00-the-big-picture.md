@@ -65,9 +65,9 @@ flowchart LR
 
 ## Where to look in the code
 
-- `lib/crewai/src/crewai/crew.py` grounds crew kickoff, the shared task loop, context accumulation, and manager agent behavior.
-- `lib/crewai/src/crewai/task.py` grounds task context selection, guardrails, and both async task paths.
-- `lib/crewai/src/crewai/agent/core.py` and `lib/crewai/src/crewai/agents/agent_builder/base_agent.py` ground agent assembly, prompt building, tools, memory, knowledge, and skills.
-- `lib/crewai/src/crewai/llm.py`, `lib/crewai/src/crewai/tools/base_tool.py`, and `lib/crewai/src/crewai/events/event_bus.py` ground provider routing, tool conversion, and shared event delivery.
-- `lib/crewai/src/crewai/memory/unified_memory.py`, `lib/crewai/src/crewai/knowledge/knowledge.py`, `lib/crewai/src/crewai/hooks/dispatch.py`, `lib/crewai/src/crewai/hooks/decorators.py`, `lib/crewai/src/crewai/flow/runtime/__init__.py`, and `lib/crewai/src/crewai/flow/flow.py` ground memory, knowledge, interception, and the asyncio flow engine.
+- `lib/crewai/src/crewai/crew.py` anchors crew kickoff, the shared task loop, context accumulation, and manager behavior.
+- `lib/crewai/src/crewai/task.py` anchors task context selection, guardrails, and both async task paths.
+- `lib/crewai/src/crewai/agent/core.py` and `lib/crewai/src/crewai/agents/agent_builder/base_agent.py` anchor agent assembly, prompt building, tools, memory, knowledge, and skills.
+- `lib/crewai/src/crewai/llm.py`, `lib/crewai/src/crewai/tools/base_tool.py`, and `lib/crewai/src/crewai/events/event_bus.py` anchor provider routing, tool conversion, and shared event delivery.
+- `lib/crewai/src/crewai/memory/unified_memory.py`, `lib/crewai/src/crewai/knowledge/knowledge.py`, `lib/crewai/src/crewai/hooks/dispatch.py`, `lib/crewai/src/crewai/hooks/decorators.py`, `lib/crewai/src/crewai/flow/runtime/__init__.py`, and `lib/crewai/src/crewai/flow/flow.py` anchor memory, knowledge, interception, and the asyncio flow engine.
 - See [Anatomy of a kickoff](./01-anatomy-of-a-kickoff.md) and [The flow scheduler](./06-the-flow-scheduler.md) for the deeper runtime paths.
