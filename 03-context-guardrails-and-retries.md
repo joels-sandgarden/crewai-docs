@@ -42,11 +42,11 @@ A task produces `TaskOutput`. The important runtime fields are `raw`, plus optio
 
 `ConditionalTask.should_execute` checks the previous task output at runtime. The crew calls `check_conditional_skip` just before the task would run. If the condition returns false, `get_skipped_task_output()` creates an empty raw `TaskOutput`, and the crew records the skip path.
 
-A skipped task does not add useful text to later context accumulation because its `raw` field stays empty. The crew still preserves the skip in its execution record, so the run keeps a visible trace of the branch that did not execute.
+A skipped task does not add useful text to later context accumulation because its `raw` field stays empty. The crew still records the skipped branch, so the run keeps a visible trace of the path that did not execute.
 
 ## Guardrails and retries
 
-The agent finishes first. Guardrail validation runs after that output exists and before the crew accepts it for downstream use. This is the boundary between raw generation and the output that later tasks consume.
+The executor finishes first. Guardrail validation runs after that output exists and before the crew accepts it for downstream use. This is the boundary between raw generation and the output that later tasks consume.
 
 Multiple guardrails run in order. Each guardrail receives the output produced by the previous one, so a guardrail can transform the result before the next guardrail sees it. If a guardrail fails, `_invoke_guardrail_function` or `_ainvoke_guardrail_function` re-executes the task with a validation error message injected as context. The task retries up to `guardrail_max_retries` additional attempts; `max_retries` remains only as the deprecated older name. If the retries run out, the task raises an exception.
 
@@ -54,7 +54,7 @@ Multiple guardrails run in order. Each guardrail receives the output produced by
 
 ## Inputs come first
 
-Inputs passed to `kickoff(inputs=...)` are interpolated into task descriptions and expected outputs before execution begins. The run therefore starts with inputs at the top, carries accepted outputs forward as accumulated context, and ends with one crew result.
+Inputs passed to `kickoff(inputs=...)` are interpolated into task descriptions and expected outputs before execution begins. The run therefore starts with inputs, carries accepted outputs forward as accumulated context, and ends with one crew result.
 
 ## Where to look in the code
 
