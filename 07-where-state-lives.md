@@ -49,7 +49,7 @@ Tool-result caching stays opt in. `crewai.agents.cache.cache_handler.CacheHandle
 | System | What it stores | Written when | Read when | Composes with |
 | --- | --- | --- | --- | --- |
 | `Memory` | Learned facts, decisions, and other recalled content | During `remember()` / `remember_many()` and after agent execution via `BaseAgentExecutor._save_to_memory()` | During `recall()` and through injected memory tools | Agent tools, `EncodingFlow`, `RecallFlow`, crew memory views |
-| Flow persistence | Flow state snapshots with an `id` | After a persisted flow method completes | When the flow reloads persisted state | `FlowPersistence`, `@persist`, `PersistenceDecorator.persist_state`, `default_flow_persistence()` |
+| Flow persistence | Flow state snapshots with an `id` | After a persisted flow method completes | When the flow reloads persisted state | `FlowPersistence`, `@persist`, `PersistenceDecorator.persist_state`, `SQLiteFlowPersistence` |
 | Checkpointing | `RuntimeState`, event history, lineage, and checkpoint fields | When a configured checkpoint event fires | When `RuntimeState.from_checkpoint()`, `Crew.from_checkpoint()`, or `Flow.from_checkpoint()` loads a snapshot | `state/provider/*`, `CheckpointConfig` |
 | Task replay | Task outputs, inputs, and replay status | After each task completes through `TaskOutputStorageHandler` | When `Crew.replay(task_id, ...)` reloads earlier outputs | `TaskOutputStorageHandler`, `KickoffTaskOutputsSQLiteStorage` |
 | Tool-result caching | Cached tool outputs keyed by tool input | When a tool call writes to `CacheHandler` | When `CacheTools.hit_cache()` reads a cached value | Tool execution path, `crewai.llms.cache` markers |
@@ -58,7 +58,7 @@ Tool-result caching stays opt in. `crewai.agents.cache.cache_handler.CacheHandle
 
 - `lib/crewai/src/crewai/memory/unified_memory.py`, `lib/crewai/src/crewai/memory/encoding_flow.py`, and `lib/crewai/src/crewai/memory/recall_flow.py` — `Memory.remember()`, `Memory.remember_many()`, `Memory.recall()`, `EncodingFlow`, `RecallFlow`
 - `lib/crewai/src/crewai/tools/memory_tools.py`, `lib/crewai/src/crewai/memory/storage/factory.py`, `lib/crewai/src/crewai/memory/storage/lancedb_storage.py`, and `lib/crewai/src/crewai/memory/storage/qdrant_edge_storage.py` — `create_memory_tools()`, `set_memory_storage_factory()`, `LanceDBStorage`, `QdrantEdgeStorage`
-- `lib/crewai/src/crewai/flow/runtime/` and `lib/crewai/src/crewai/flow/persistence/decorators.py` — `Flow.kickoff()`, `Flow.kickoff_async()`, `persist`, `PersistenceDecorator.persist_state`
-- `lib/crewai/src/crewai/state/runtime.py` and `CheckpointConfig` — `RuntimeState`, `RuntimeState.from_checkpoint()`
+- `lib/crewai/src/crewai/flow/runtime/__init__.py` and `lib/crewai/src/crewai/flow/persistence/decorators.py` — `Flow.kickoff()`, `Flow.kickoff_async()`, `persist`, `PersistenceDecorator.persist_state`
+- `lib/crewai/src/crewai/state/checkpoint_config.py` — `CheckpointConfig`, `RuntimeState.from_checkpoint()`
 - `lib/crewai/src/crewai/crew.py`, `lib/crewai/src/crewai/utilities/task_output_storage_handler.py`, and `lib/crewai/src/crewai/memory/storage/kickoff_task_outputs_storage.py` — `Crew._drain_memory_writes()`, `Crew.replay()`, `Crew.from_checkpoint()`, `TaskOutputStorageHandler`, `KickoffTaskOutputsSQLiteStorage`
 - `lib/crewai/src/crewai/agents/cache/cache_handler.py`, `lib/crewai/src/crewai/tools/cache_tools/cache_tools.py`, and `lib/crewai/src/crewai/llms/cache.py` — `CacheHandler`, `CacheTools.hit_cache()`, `mark_cache_breakpoint()`
