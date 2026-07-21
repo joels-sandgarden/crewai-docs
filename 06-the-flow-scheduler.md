@@ -4,7 +4,7 @@
 
 CrewAI Flows read like decorators on a class, but the runtime behaves like a dispatch machine that sits underneath those decorators. The class metadata gives the engine a declarative graph of starts, listeners, routers, persistence, and human feedback, and the runtime turns that graph into scheduling decisions at execution time.
 
-This page covers the runtime model that the decorator reference omits. For the surface API and user facing examples, see [Flows](/en/concepts/flows), [Mastering Flow State](/en/guides/flows/mastering-flow-state), and [Human Feedback in Flows](/en/learn/human-feedback-in-flows).
+This page covers the runtime model that the decorator reference omits. For the surface API and user-facing examples, see [Flows](/en/concepts/flows), [Mastering Flow State](/en/guides/flows/mastering-flow-state), and [Human Feedback in Flows](/en/learn/human-feedback-in-flows).
 
 ## The graph under the decorators
 
@@ -44,7 +44,7 @@ The dispatch order therefore looks like this:
 
 `or_()` behaves differently when it listens to more than one event. The runtime treats those listeners as one shot for the current cycle and tracks them in `_fired_or_listeners`, guarded by a lock. That lock prevents repeated firings from the same cycle and keeps concurrent dispatch from racing the bookkeeping.
 
-Only exclusive multi event `or_()` groups enter the racing path. When the runtime sees a group that no other listener shares, it starts all members together, waits for the first successful completion, and cancels the losers. Other listeners in the same batch still run normally.
+Only exclusive multi-event `or_()` groups enter the racing path. When the runtime sees a group that no other listener shares, it starts all members together, waits for the first successful completion, and cancels the losers. Other listeners in the same batch still run normally.
 
 That design keeps `and_()` predictable, keeps multi event `or_()` from firing twice in one cycle, and still lets mutually exclusive alternatives compete when the graph calls for it.
 
@@ -66,12 +66,13 @@ Human feedback follows the same scheduling model. `lib/crewai/src/crewai/flow/hu
 
 ```mermaid
 flowchart TD
-  A[Method complete] --> B[Router loop]
-  B --> C[Outcome event]
-  C --> B
-  B --> D[Listeners gather]
-  D --> E[Listener complete]
-  E --> B
+  A[Method complete] --> B[Dispatch]
+  B --> C[Router loop]
+  C --> D[Outcome event]
+  D --> C
+  C --> E[Listeners gather]
+  E --> F[Listener complete]
+  F --> B
 ```
 
 ## Where to look in the code
