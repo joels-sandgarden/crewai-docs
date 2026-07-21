@@ -20,7 +20,7 @@ After preparation, `Crew.kickoff` chooses either `_run_sequential_process` or `_
 
 ## The task loop
 
-`_execute_tasks` walks the tasks in list order and asks `prepare_task_execution` for the current agent, tool set, and replay skip state. From there, the loop handles conditional-task skipping, replay-aware skipping, and context assembly from earlier outputs. The default context path accumulates prior task outputs, while explicit task context narrows the input set for that task.
+`_execute_tasks` walks the tasks in list order and asks `prepare_task_execution` for the current agent, tool set, and replay skip state. From there, the loop handles conditional-task skipping, replay aware skipping, and context assembly from earlier outputs. The default context path accumulates prior task outputs, while explicit task context narrows the input set for that task.
 
 Async tasks enter the loop as futures, and the next synchronous task or the end of the crew acts as the join barrier. When the loop reaches a synchronous task with pending async work, it waits for the outstanding futures, collects their outputs, and then hands the current task to the executor path. That handoff leads into `CrewAgentExecutor` in `lib/crewai/src/crewai/agents/crew_agent_executor.py`, which owns the agent turn itself; the executor loop is covered in `./02-the-agent-executor-loop.md`, and the async barrier behavior is covered in `./05-threads-asyncio-and-the-async-barrier.md`.
 
@@ -28,7 +28,7 @@ Async tasks enter the loop as futures, and the next synchronous task or the end 
 
 ## Output assembly
 
-`_create_crew_output` chooses the last non-empty task output as the crew result. It then aggregates token and usage metrics and builds a `CrewOutput` from `lib/crewai/src/crewai/crews/crew_output.py`, which carries `raw`, `pydantic`, `json_dict`, `tasks_output`, and `token_usage` fields. The final object keeps both the typed result and the plain task trail that produced it.
+`_create_crew_output` chooses the last task output with content as the crew result. It then aggregates token and usage metrics and builds a `CrewOutput` from `lib/crewai/src/crewai/crews/crew_output.py`, which carries `raw`, `pydantic`, `json_dict`, `tasks_output`, and `token_usage` fields. The final object keeps both the typed result and the plain task trail that produced it.
 
 ## Tail
 
