@@ -22,7 +22,7 @@ Recall starts when an agent calls recall or when the crew asks memory for contex
 
 The `@persist` decorator and the `FlowPersistence` interface form the flow-specific persistence layer in `crewai.flow.persistence.*`. The decorator only marks the flow or method for persistence; the flow engine saves state after the marked method completes.
 
-Persisted flow state carries an `id`, and the default persistence path uses SQLite when no backend appears in the flow definition. Restoring this state resumes a paused flow; it does not use the crew checkpoint path.
+Persisted flow state carries an `id`, and by default the flow uses SQLite when no backend appears in the flow definition. Restoring this state resumes a paused flow; it does not use the crew checkpoint path.
 
 ## Crew checkpointing in `state/`
 
@@ -47,7 +47,7 @@ Tool-result caching stays opt in. `crewai.agents.cache.cache_handler.CacheHandle
 | System | What it stores | Written when | Read when | Composes with |
 | --- | --- | --- | --- | --- |
 | `Memory` | Learned facts, decisions, and other recalled content | During `remember()` / `remember_many()` and after agent execution via `BaseAgentExecutor._save_to_memory()` | During `recall()` and through injected memory tools | Agent tools, `EncodingFlow`, `RecallFlow`, crew memory views |
-| Flow persistence | Flow state snapshots with an `id` | After a persisted flow method completes | When a paused flow resumes from persisted state | `FlowPersistence`, `@persist`, `SQLiteFlowPersistence`, `Flow.resume()` |
+| Flow persistence | Flow state snapshots with an `id` | After a persisted flow method completes | When a paused flow resumes from persisted state | `FlowPersistence`, `@persist`, `SQLiteFlowPersistence`, `Flow.from_pending()`, `Flow.resume()` |
 | Checkpointing | `RuntimeState`, event history, lineage, and checkpoint fields | When a configured checkpoint event fires | When `RuntimeState.from_checkpoint()`, `Crew.from_checkpoint()`, or `Flow.from_checkpoint()` loads a snapshot | `state/provider/*`, `CheckpointConfig` |
 | Task replay | Task outputs, inputs, and replay status | After each task completes through `TaskOutputStorageHandler` | When `Crew.replay(task_id, ...)` reloads earlier outputs | `TaskOutputStorageHandler`, `KickoffTaskOutputsSQLiteStorage` |
 | Tool-result caching | Cached tool outputs keyed by tool input | When a tool call writes to `CacheHandler` | When `CacheTools.hit_cache()` reads a cached value | Tool execution path, `crewai.llms.cache` markers |
@@ -55,9 +55,8 @@ Tool-result caching stays opt in. `crewai.agents.cache.cache_handler.CacheHandle
 ## Where to look in the code
 
 - `lib/crewai/src/crewai/memory/unified_memory.py` — `Memory.remember()`, `Memory.remember_many()`, `Memory.recall()`, `Memory.drain_writes()`
-- `lib/crewai/src/crewai/memory/encoding_flow.py` — `EncodingFlow`
-- `lib/crewai/src/crewai/memory/recall_flow.py` — `RecallFlow`
+- `lib/crewai/src/crewai/memory/encoding_flow.py` and `lib/crewai/src/crewai/memory/recall_flow.py` — `EncodingFlow`, `RecallFlow`
 - `lib/crewai/src/crewai/crew.py` — `Crew._drain_memory_writes()`, `Crew.replay()`, `Crew.from_checkpoint()`
 - `lib/crewai/src/crewai/state/runtime.py` — `RuntimeState`, `RuntimeState.checkpoint()`, `RuntimeState.from_checkpoint()`
-- `lib/crewai/src/crewai/flow/persistence/decorators.py` — `persist`, `PersistenceDecorator.persist_state`
-- `lib/crewai/src/crewai/utilities/task_output_storage_handler.py` — `TaskOutputStorageHandler`
+- `lib/crewai/src/crewai/flow/persistence/decorators.py` and `lib/crewai/src/crewai/flow/persistence/sqlite.py` — `persist`, `PersistenceDecorator.persist_state`, `SQLiteFlowPersistence`
+- `lib/crewai/src/crewai/utilities/task_output_storage_handler.py` and `lib/crewai/src/crewai/memory/storage/kickoff_task_outputs_storage.py` — `TaskOutputStorageHandler`, `KickoffTaskOutputsSQLiteStorage`
