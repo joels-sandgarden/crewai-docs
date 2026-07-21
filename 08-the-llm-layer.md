@@ -22,7 +22,7 @@ That contract also exposes capability predicates such as `supports_function_call
 
 ## Migration story in this snapshot
 
-As of this repository snapshot, the codebase sits between two routing styles. `lib/crewai/src/crewai/llm.py` still keeps LiteLLM fallback behavior for broad compatibility, while `lib/crewai/src/crewai/llms/providers/` carries direct SDK implementations for the major native families. The gateway still centralizes broad coverage, but the native SDKs now expose the provider specific control this snapshot uses for streaming, structured outputs, and error handling. The coexistence of both paths shows a transition, not a finished removal. For the broader migration context, see the [LiteLLM removal guide](https://docs.crewai.com/en/learn/litellm-removal-guide).
+As of this repository snapshot, the codebase sits between two routing styles. `lib/crewai/src/crewai/llm.py` still keeps LiteLLM fallback behavior for broad compatibility, while `lib/crewai/src/crewai/llms/providers/` carries direct SDK implementations for the major native families. The gateway still centralizes broad coverage, but the native SDKs now expose the provider-specific control this snapshot uses for streaming, structured outputs, and error handling. The coexistence of both paths shows a transition, not a finished removal. For the broader migration context, see the [LiteLLM removal guide](https://docs.crewai.com/en/learn/litellm-removal-guide).
 
 ## Where the LLM layer fits in runtime
 
