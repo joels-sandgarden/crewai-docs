@@ -12,7 +12,7 @@ As of this repository snapshot, a crew does not hand one task result directly to
 
 This page describes that data flow. It stays on runtime behavior, not configuration, and follows the same task loop that sequential and hierarchical crews share.
 
-For configuration and guardrail how-to material, see the official tasks documentation at [Tasks](https://docs.crewai.com/en/concepts/tasks).
+For configuration and guardrail how-to material, see [Tasks](https://docs.crewai.com/en/concepts/tasks).
 
 ```mermaid
 flowchart LR
@@ -58,7 +58,7 @@ Later tasks see the skip as history, not as new content, so the branch can affec
 
 The executor finishes first. Guardrail validation runs after that output exists and before the crew accepts it for downstream use. This is the boundary between raw generation and the output that later tasks consume.
 
-For the execution and validation boundary that comes before guardrail retries, see [The Agent Executor Loop](./02-the-agent-executor-loop.md).
+For the execution and validation boundary before guardrail retries, see [The Agent Executor Loop](./02-the-agent-executor-loop.md).
 
 Multiple guardrails run in order. Each guardrail receives the output produced by the previous one, so a guardrail can transform the result before the next guardrail sees it. If a guardrail fails, `_invoke_guardrail_function` or `_ainvoke_guardrail_function` re-executes the task with a validation error message injected as context. The task retries up to `guardrail_max_retries` additional attempts; `max_retries` remains only as the deprecated older name. If the retries run out, the task raises an exception.
 
