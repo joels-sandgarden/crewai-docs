@@ -4,7 +4,7 @@ This page maps the runtime concurrency model behind CrewAI execution. It explain
 
 ## Two meanings of `async`
 
-`Task.execute_async` and task level `async_execution=True` start a daemon `threading.Thread` and return a `concurrent.futures.Future[TaskOutput]`. That path still runs the same task execution core, but it runs it on a thread instead of on the event loop. The crew task loop stores those futures and keeps moving through the task list until it reaches a barrier.
+`Task.execute_async` and task level `async_execution=True` start a daemon `threading.Thread` and return a `concurrent.futures.Future[TaskOutput]`. That path still runs the same task execution core, but it runs it on a thread instead of on the event loop. In the sync crew loop, those tasks collect as pending futures; in the native async crew loop, `Crew._aexecute_tasks` collects `asyncio.Task` objects and awaits them directly.
 
 The native async mirror lives in `Task.aexecute_sync`, which awaits `_aexecute_core` and keeps the task inside asyncio. That path calls `agent.aexecute_task`, uses async guardrail handling, and reaches `async_convert_to_model` through `_aexport_output` when structured output is enabled. The crew's native async path uses that coroutine from `Crew._aexecute_tasks` and `Crew.akickoff`.
 
@@ -37,7 +37,7 @@ The same barrier appears in the streaming and conditional branches. `Crew._handl
 
 `kickoff_for_each` runs a plain sequential loop over `self.copy()` for each input. Each copied crew runs independently, but the inputs still execute one after another. `kickoff_for_each_async` keeps the same copy per input isolation and then fans out the copies with `asyncio.create_task` plus `asyncio.gather` when streaming is off. In streaming mode, `run_for_each_async` still builds separate copies first, starts each kickoff one by one, and then gathers the stream consumers that drain those independent runs.
 
-For the public usage view of those entry points, see [kickoff for each](https://docs.crewai.com/en/learn/kickoff-for-each) and [kickoff async](https://docs.crewai.com/en/learn/kickoff-async). For the runtime map that sits underneath them, see [Anatomy of a kickoff](./01-anatomy-of-a-kickoff.md).
+For the public usage view of those entry points, see [kickoff for each](https://docs.crewai.com/en/learn/kickoff-for-each). For the runtime map that sits underneath them, see [Anatomy of a kickoff](./01-anatomy-of-a-kickoff.md).
 
 ## Native async mirrors in the executor and the Flow runtime
 
