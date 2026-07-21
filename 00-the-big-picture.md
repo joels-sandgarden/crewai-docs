@@ -1,14 +1,15 @@
 # The Big Picture
 
 This page is the entry point for the field guide. It sets the runtime model in view before the deeper concept pages take over, so an experienced engineer can orient quickly and then move into the detailed paths for crews, agents, tasks, and flows.
+The companion concept pages cover [Crews](https://docs.crewai.com/en/concepts/crews), [Agents](https://docs.crewai.com/en/concepts/agents), [Tasks](https://docs.crewai.com/en/concepts/tasks), and [Flows](https://docs.crewai.com/en/concepts/flows).
 
-The runtime code lives in `lib/crewai/src/crewai/`, the standalone CLI lives in `lib/cli`, and the embedded `lib/crewai/src/crewai/cli/` tree remains part of an extraction in progress. This guide stays at the level of execution semantics: what happens when a crew or flow runs, how work moves between objects, and where the major responsibilities sit.
+The runtime code lives in `lib/crewai/src/crewai/`, the standalone CLI lives in `lib/cli`, and the embedded `lib/crewai/src/crewai/cli/` tree remains part of an extraction in progress. This guide stays at the level of execution semantics: what happens when a crew or flow runs, how work moves between objects, and where responsibilities sit.
 
 ## Two execution engines
 
-CrewAI organizes runtime work around two engines. A crew run starts in `kickoff()` and drives a shared task loop in `lib/crewai/src/crewai/crew.py`. Sequential and hierarchical execution both reuse that same loop, so the difference between them does not come from a separate scheduler. In hierarchical mode, CrewAI validates or builds a manager agent first, then lets that agent delegate through ordinary tools rather than through a special planner.
+CrewAI organizes runtime work around two engines. A crew run starts in `kickoff()` and drives a shared task loop in `lib/crewai/src/crewai/crew.py`. Sequential and hierarchical execution both reuse that same loop, so the difference between them does not depend on a separate scheduler. In hierarchical mode, CrewAI validates or builds a manager agent first, then lets that agent delegate through ordinary tools rather than through a special planner layer.
 
-Flow runtime follows a different shape. The engine in `lib/crewai/src/crewai/flow/runtime/__init__.py` and `lib/crewai/src/crewai/flow/flow.py` runs on asyncio and treats each method completion as an event. Routers fire first, one after another, until none of them trigger; then listeners run in parallel. That ordering matters because it gives the runtime a clear control surface for declarative orchestration.
+Flow runtime follows a different shape. The engine in `lib/crewai/src/crewai/flow/runtime/__init__.py` and `lib/crewai/src/crewai/flow/flow.py` runs on asyncio and treats each method completion as an event. Routers fire first, one after another, until none of them trigger; then listeners run in parallel. That ordering gives the runtime a clear control surface for declarative orchestration.
 
 ## Core object map
 
