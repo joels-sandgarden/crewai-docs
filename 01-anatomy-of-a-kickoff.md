@@ -32,9 +32,9 @@ Async tasks enter the loop as futures, and the next synchronous task or the end 
 
 ## Tail
 
-After the main process returns, kickoff runs `after_kickoff_callbacks`, passes the result through `_post_kickoff`, and then clears file inputs in the final cleanup block. On success, `_create_crew_output` dispatches the output and execution-end hooks, drains memory writes, flushes the event bus, and emits `CrewKickoffCompletedEvent`; on failure, kickoff emits `CrewKickoffFailedEvent` from the exception path.
+On the success path, kickoff runs `after_kickoff_callbacks`, passes the result through `_post_kickoff`, drains memory writes, and emits `CrewKickoffCompletedEvent` before it returns. If kickoff fails, the `finally` cleanup block still runs, clears file inputs, unwinds the runtime scope, and lets the exception path emit `CrewKickoffFailedEvent`.
 
-`_drain_memory_writes` exists because memory saves can still be in flight when kickoff otherwise looks finished. `Memory` in `lib/crewai/src/crewai/memory/unified_memory.py` uses a single worker save pool, so kickoff waits for those saves before it emits completion and before listener teardown can close the event path.
+`_drain_memory_writes` stays in that cleanup path because memory saves can still be in flight when kickoff otherwise looks finished. `Memory` in `lib/crewai/src/crewai/memory/unified_memory.py` uses a single worker save pool, so kickoff waits for those saves before completion can race listener teardown.
 
 ## Side channels
 
@@ -59,10 +59,9 @@ flowchart TD
 
 ## Where to look in the code
 
-- `lib/crewai/src/crewai/crew.py` — kickoff entry, process dispatch, task loop, output assembly, replay, and cleanup.
-- `lib/crewai/src/crewai/crews/utils.py` — kickoff preparation, input normalization, file storage, agent setup, and planning.
-- `lib/crewai/src/crewai/agents/crew_agent_executor.py` — executor loop that turns task context and tools into one agent turn.
-- `lib/crewai/src/crewai/memory/unified_memory.py` — background memory saves, drain behavior, and save lifecycle events.
-- `lib/crewai/src/crewai/crews/crew_output.py` — final crew result shape and usage metrics.
+- `lib/crewai/src/crewai/crew.py` — kickoff entry, task flow, output assembly, replay, and cleanup.
+- `lib/crewai/src/crewai/crews/utils.py` — kickoff preparation and input handling.
+- `lib/crewai/src/crewai/agents/crew_agent_executor.py` — agent turn execution.
+- `lib/crewai/src/crewai/memory/unified_memory.py` — background saves and drain behavior.
+- `lib/crewai/src/crewai/crews/crew_output.py` — final crew result shape.
 - `lib/crewai/src/crewai/events/types/crew_events.py` — kickoff lifecycle events.
-- `./00-the-big-picture.md`, `./02-the-agent-executor-loop.md`, `./03-context-guardrails-and-retries.md`, `./04-the-hierarchical-process.md`, `./05-threads-asyncio-and-the-async-barrier.md`, `./06-the-flow-scheduler.md`, `./07-where-state-lives.md`, `./08-the-llm-layer.md`, `./09-about-this-site.md`
