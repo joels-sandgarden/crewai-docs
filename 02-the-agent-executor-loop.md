@@ -40,11 +40,7 @@ flowchart TD
 
 ## Native tool calling
 
-The native path handles structured tool calls instead of ReAct text. `_handle_native_tool_calls` normalizes provider-specific shapes into one internal form, maps each call back to the original tool, and sends safe batches through a `ThreadPoolExecutor` when the batch can run together.
-
-The executor keeps calls sequential when any tool in the batch can end the turn with `result_as_answer` or carries a usage cap. After each call, it appends the assistant tool-call message and the tool result message back into history, then adds a short reasoning prompt so the model can decide whether to call another tool or finish.
-
-The native path still honors the same exit rules as the text loop.
+The native path handles structured tool calls instead of ReAct text, and `_handle_native_tool_calls` normalizes provider-specific shapes into one internal form, maps each call back to the original tool, and sends safe batches through a `ThreadPoolExecutor` when the batch can run together. The executor keeps calls sequential when any tool in the batch can end the turn with `result_as_answer` or carries a usage cap, and it still honors the same exit rules as the text loop while appending the assistant tool-call message and the tool result message back into history before adding a short reasoning prompt.
 
 ## Async and human feedback
 
