@@ -57,7 +57,7 @@ The bus also keeps the sync and async paths separate enough to fit both crew and
 
 - `Crew._create_crew_output()` and the Flow finish path both drain background memory writes before they emit their completion event. That prevents a listener teardown from cutting off `MemorySaveCompletedEvent` or `MemorySaveFailedEvent` traffic. The memory state model in [Where state lives](./07-where-state-lives.md) explains why that barrier matters.
 - `Flow.kickoff()` keeps a sync entry point inside a running event loop by copying the current context and running `asyncio.run(_run_flow())` on a single worker thread. That avoids nested loop errors without changing the flow's own asyncio runtime.
-- `Task._execute_core()` and `CrewAgentExecutor._invoke_step_callback()` both accept async callbacks in sync execution. Each path checks the return value, then runs `asyncio.run()` when the callback returns an awaitable, so callback authors can stay async without forcing the whole crew path into asyncio.
+- `Task._execute_core()` handles both `self.callback` and `crew.task_callback` inside the synchronous task path. It checks `inspect.iscoroutine(cb_result)` and runs `asyncio.run(cb_result)` when a callback returns a coroutine, so async callback code can stay local to the callback without moving task execution onto asyncio.
 
 ## Where to look in the code
 
