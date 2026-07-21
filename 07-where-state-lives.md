@@ -10,6 +10,8 @@ CrewAI uses one `Memory` object as the runtime memory layer. That object handles
 
 Save starts when an agent or crew hands text to memory. The `BaseAgentExecutor._save_to_memory()` path extracts relevant facts from task output, then calls `Memory.remember()` or `Memory.remember_many()`. The memory object infers scope, categories, and importance during the save pipeline, and it writes the result through a pluggable backend under `crewai.memory.storage`.
 
+The built-in storage backends live in `lib/crewai/src/crewai/memory/storage/lancedb_storage.py` (`LanceDBStorage`) and `lib/crewai/src/crewai/memory/storage/qdrant_edge_storage.py` (`QdrantEdgeStorage`), and `lib/crewai/src/crewai/memory/storage/factory.py` exposes `set_memory_storage_factory()` as the extension point.
+
 Recall starts when an agent calls recall or when the crew asks memory for context. The memory object first drains pending background writes, then it searches. Agents reach the same memory through injected tools from `crewai.tools.memory_tools.create_memory_tools()`, so recall and save stay available at the point of execution rather than as a separate setup step.
 
 ## Background writes and completion ordering
@@ -47,16 +49,16 @@ Tool-result caching stays opt in. `crewai.agents.cache.cache_handler.CacheHandle
 | System | What it stores | Written when | Read when | Composes with |
 | --- | --- | --- | --- | --- |
 | `Memory` | Learned facts, decisions, and other recalled content | During `remember()` / `remember_many()` and after agent execution via `BaseAgentExecutor._save_to_memory()` | During `recall()` and through injected memory tools | Agent tools, `EncodingFlow`, `RecallFlow`, crew memory views |
-| Flow persistence | Flow state snapshots with an `id` | After a persisted flow method completes | When a paused flow resumes from persisted state | `FlowPersistence`, `@persist`, `SQLiteFlowPersistence`, `Flow.from_pending()`, `Flow.resume()` |
+| Flow persistence | Flow state snapshots with an `id` | After a persisted flow method completes | When the flow restores from persisted state | `FlowPersistence`, `@persist`, `PersistenceDecorator.persist_state`, `default_flow_persistence()` |
 | Checkpointing | `RuntimeState`, event history, lineage, and checkpoint fields | When a configured checkpoint event fires | When `RuntimeState.from_checkpoint()`, `Crew.from_checkpoint()`, or `Flow.from_checkpoint()` loads a snapshot | `state/provider/*`, `CheckpointConfig` |
 | Task replay | Task outputs, inputs, and replay status | After each task completes through `TaskOutputStorageHandler` | When `Crew.replay(task_id, ...)` reloads earlier outputs | `TaskOutputStorageHandler`, `KickoffTaskOutputsSQLiteStorage` |
 | Tool-result caching | Cached tool outputs keyed by tool input | When a tool call writes to `CacheHandler` | When `CacheTools.hit_cache()` reads a cached value | Tool execution path, `crewai.llms.cache` markers |
 
 ## Where to look in the code
 
-- `lib/crewai/src/crewai/memory/unified_memory.py` — `Memory.remember()`, `Memory.remember_many()`, `Memory.recall()`, `Memory.drain_writes()`
-- `lib/crewai/src/crewai/memory/encoding_flow.py` and `lib/crewai/src/crewai/memory/recall_flow.py` — `EncodingFlow`, `RecallFlow`
-- `lib/crewai/src/crewai/crew.py` — `Crew._drain_memory_writes()`, `Crew.replay()`, `Crew.from_checkpoint()`
-- `lib/crewai/src/crewai/state/runtime.py` — `RuntimeState`, `RuntimeState.checkpoint()`, `RuntimeState.from_checkpoint()`
-- `lib/crewai/src/crewai/flow/persistence/decorators.py` and `lib/crewai/src/crewai/flow/persistence/sqlite.py` — `persist`, `PersistenceDecorator.persist_state`, `SQLiteFlowPersistence`
-- `lib/crewai/src/crewai/utilities/task_output_storage_handler.py` and `lib/crewai/src/crewai/memory/storage/kickoff_task_outputs_storage.py` — `TaskOutputStorageHandler`, `KickoffTaskOutputsSQLiteStorage`
+- `lib/crewai/src/crewai/memory/unified_memory.py`, `lib/crewai/src/crewai/memory/encoding_flow.py`, and `lib/crewai/src/crewai/memory/recall_flow.py` — `Memory.remember()`, `Memory.remember_many()`, `Memory.recall()`, `EncodingFlow`, `RecallFlow`
+- `lib/crewai/src/crewai/tools/memory_tools.py`, `lib/crewai/src/crewai/memory/storage/factory.py`, `lib/crewai/src/crewai/memory/storage/lancedb_storage.py`, and `lib/crewai/src/crewai/memory/storage/qdrant_edge_storage.py` — `create_memory_tools()`, `set_memory_storage_factory()`, `LanceDBStorage`, `QdrantEdgeStorage`
+- `lib/crewai/src/crewai/flow/runtime/` and `lib/crewai/src/crewai/flow/persistence/decorators.py` — `Flow.kickoff()`, `Flow.kickoff_async()`, `persist`, `PersistenceDecorator.persist_state`
+- `lib/crewai/src/crewai/state/runtime.py` and `CheckpointConfig` — `RuntimeState`, `RuntimeState.from_checkpoint()`
+- `lib/crewai/src/crewai/crew.py`, `lib/crewai/src/crewai/utilities/task_output_storage_handler.py`, and `lib/crewai/src/crewai/memory/storage/kickoff_task_outputs_storage.py` — `Crew._drain_memory_writes()`, `Crew.replay()`, `Crew.from_checkpoint()`, `TaskOutputStorageHandler`, `KickoffTaskOutputsSQLiteStorage`
+- `lib/crewai/src/crewai/agents/cache/cache_handler.py`, `lib/crewai/src/crewai/tools/cache_tools/cache_tools.py`, and `lib/crewai/src/crewai/llms/cache.py` — `CacheHandler`, `CacheTools.hit_cache()`, `mark_cache_breakpoint()`
