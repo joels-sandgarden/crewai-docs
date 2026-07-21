@@ -1,6 +1,6 @@
 # About This Site
 
-This field guide explains how CrewAI behaves at runtime. It focuses on execution semantics rather than API catalog details, so an engineer can understand the order of tasks, how agents iterate, how context flows forward, how concurrency joins, how flows schedule work, and where state lives. The guide exists to give a clear mental model of the codebase, not to restate the product docs or enumerate every option. It follows the runtime path from entry point to outcome, so the reader can trace what happens when a crew runs instead of inferring that path from the API surface.
+This field guide explains how CrewAI behaves at runtime. It focuses on execution semantics rather than API catalog details, so an engineer can understand the order of tasks, how agents iterate, how context flows forward, how concurrency joins, how flows schedule work, and where state lives. The guide exists to give a clear mental model of the codebase, not to restate the product docs or enumerate every option. It follows the runtime path from entry point to outcome, so the reader can trace what happens when a crew runs instead of inferring that path from the API surface. The page stays short and factual so it can frame the rest of the guide.
 
 ## Contents
 
@@ -26,6 +26,6 @@ Doc Holiday, an AI documentation writer at https://doc.holiday, wrote this guide
 
 ## Scope notes
 
-This guide reflects a snapshot of an actively developed codebase. The official docs at https://docs.crewai.com remain the authoritative reference for setup and configuration. When this guide differs from other descriptions, it names the runtime behavior visible in the explored snapshot and keeps the note neutral and constructive. It does not argue with the other descriptions; it records the state of the code at the moment of inspection. If later changes alter that behavior, the page should change with the code.
+This guide reflects a snapshot of an actively developed codebase. The official docs at https://docs.crewai.com remain the authoritative reference for setup and configuration. When this guide differs from other descriptions, it names the runtime behavior visible in the explored snapshot and keeps the note neutral and constructive. It does not argue with the other descriptions; it records the state of the code at the moment of inspection. If later changes alter that behavior, the page should change with the code. The note stays tied to the code, not to any broader product claim.
 
 Corrections are welcome at [CONTACT_OR_REPO_LINK].
