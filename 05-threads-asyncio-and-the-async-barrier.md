@@ -4,7 +4,7 @@ This page maps the runtime concurrency model behind CrewAI execution. It explain
 
 ## Two meanings of `async`
 
-`Task.execute_async` and task level `async_execution=True` start a daemon `threading.Thread` and return a `concurrent.futures.Future[TaskOutput]`. That path still runs the same task execution core, but it runs it on a thread instead of on the event loop. In the sync crew loop, those tasks collect as pending futures; in the native async crew loop, `Crew._aexecute_tasks` collects `asyncio.Task` objects and awaits them directly.
+`Task.execute_async` and task level `async_execution=True` start a daemon `threading.Thread` and return a `concurrent.futures.Future[TaskOutput]`. That path still runs the same task execution core, but it runs it on a thread instead of on the event loop. In `Crew._execute_tasks`, those tasks collect as pending futures; in `Crew._aexecute_tasks`, the native async loop collects `asyncio.Task` objects and awaits them directly.
 
 The native async mirror lives in `Task.aexecute_sync`, which awaits `_aexecute_core` and keeps the task inside asyncio. That path calls `agent.aexecute_task`, uses async guardrail handling, and reaches `async_convert_to_model` through `_aexport_output` when structured output is enabled. The crew's native async path uses that coroutine from `Crew._aexecute_tasks` and `Crew.akickoff`.
 
@@ -35,7 +35,7 @@ The same barrier appears in the streaming and conditional branches. `Crew._handl
 
 ## Crew entry points and copy based fan out
 
-`kickoff_for_each` runs a plain sequential loop over `self.copy()` for each input. Each copied crew runs independently, but the inputs still execute one after another. `kickoff_for_each_async` keeps the same copy per input isolation and then fans out the copies with `asyncio.create_task` plus `asyncio.gather` when streaming is off. In streaming mode, `run_for_each_async` still builds separate copies first, starts each kickoff one by one, and then gathers the stream consumers that drain those independent runs.
+`kickoff_for_each` runs a plain sequential loop over `self.copy()` for each input. Each copied crew runs independently, but the inputs still execute one after another. `kickoff_for_each_async` keeps the same copy per input isolation. When streaming is off, it fans out the copies with `asyncio.create_task` plus `asyncio.gather`. In streaming mode, `run_for_each_async` still builds separate copies first, starts each kickoff one by one, and then gathers the stream consumers that drain those independent runs.
 
 For the public usage view of those entry points, see [kickoff for each](https://docs.crewai.com/en/learn/kickoff-for-each). For the runtime map that sits underneath them, see [Anatomy of a kickoff](./01-anatomy-of-a-kickoff.md).
 
@@ -45,7 +45,7 @@ The agent executor carries the same split. `CrewAgentExecutor.ainvoke` mirrors `
 
 The Flow runtime uses a different model again. `lib/crewai/src/crewai/flow/runtime/__init__.py` owns an asyncio native scheduler, and `Flow.kickoff_async` runs directly on the event loop. `Flow.kickoff()` keeps the sync surface alive by checking whether a loop already runs, then sending `asyncio.run(_run_flow())` through a one worker `ThreadPoolExecutor` when it needs a fresh loop. The Flow scheduler therefore owns its own async ordering rules, separate from the crew task barrier. See [the Flow scheduler](./06-the-flow-scheduler.md) for that runtime, and use the public [flows guide](https://docs.crewai.com/en/concepts/flows) only for user facing syntax.
 
-The codebase keeps both models because it serves two different runtimes. Crew kickoff still needs a sync first pipeline that can become awaitable without changing its core behavior, while Flow needs full event loop control for router ordering, listener fan out, and pause resume work. The thread bridge keeps the crew surface stable; the asyncio path gives Flow direct scheduling control.
+The codebase keeps both models because it serves two different runtimes. Crew kickoff still needs a synchronous pipeline that can become awaitable without changing its core behavior, while Flow needs full event loop control for router ordering, listener fan out, and pause resume work. The thread bridge keeps the crew surface stable; the asyncio path gives Flow direct scheduling control.
 
 ## Event bus dispatch and completion
 
