@@ -32,7 +32,7 @@ Async tasks enter the loop as futures, and the next synchronous task or the end 
 
 ## Tail
 
-On the success path, kickoff runs `after_kickoff_callbacks`, passes the result through `_post_kickoff`, drains memory writes, and emits `CrewKickoffCompletedEvent` before it returns. If kickoff fails, the `finally` cleanup block still runs, clears file inputs, unwinds the runtime scope, and lets the exception path emit `CrewKickoffFailedEvent`.
+On the success path, kickoff runs `after_kickoff_callbacks`, passes the result through `_post_kickoff`, drains memory writes, and emits `CrewKickoffCompletedEvent` before it returns. If kickoff fails, the `finally` cleanup block still runs. It clears file inputs, unwinds the runtime scope, and the exception path emits `CrewKickoffFailedEvent`.
 
 `_drain_memory_writes` stays in that cleanup path because memory saves can still be in flight when kickoff otherwise looks finished. `Memory` in `lib/crewai/src/crewai/memory/unified_memory.py` uses a single worker save pool, so kickoff waits for those saves before completion can race listener teardown.
 
