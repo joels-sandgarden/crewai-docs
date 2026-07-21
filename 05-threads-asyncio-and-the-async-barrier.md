@@ -61,10 +61,9 @@ The bus also keeps the sync and async paths separate enough to fit both crew and
 
 ## Where to look in the code
 
-- `lib/crewai/src/crewai/task.py` — thread backed `execute_async`, native async `aexecute_sync`, and guardrail handling.
-- `lib/crewai/src/crewai/crew.py` — crew task barrier, `kickoff_async`, `akickoff`, `kickoff_for_each`, `akickoff_for_each`, and task order validation.
-- `lib/crewai/src/crewai/crews/utils.py` — `run_for_each_async` and copy per input isolation.
+- `lib/crewai/src/crewai/task.py` — thread-backed `execute_async`, native async `aexecute_sync`, and guardrail handling.
+- `lib/crewai/src/crewai/crew.py` and `lib/crewai/src/crewai/crews/utils.py` — crew task barrier, kickoff paths, copy-per-input isolation, and task order validation.
 - `lib/crewai/src/crewai/agents/crew_agent_executor.py` — native async executor mirror and parallel native tool call execution.
 - `lib/crewai/src/crewai/events/event_bus.py` — daemon event loop thread, handler futures, and flush behavior.
 - `lib/crewai/src/crewai/flow/runtime/__init__.py` — asyncio native Flow runtime and fresh loop escape hatch.
-- `lib/crewai/src/crewai/memory/unified_memory.py` — background writes and drain before completion behavior.
+- `lib/crewai/src/crewai/memory/unified_memory.py` — background writes and drain-before-completion behavior.
