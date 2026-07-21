@@ -1,16 +1,16 @@
 # Where State Lives
 
-CrewAI now keeps runtime state in a small set of separate systems that often sit close together in the same execution path. This page maps those systems by the state they store, the moment they write, the moment they read, and the parts of the runtime that connect them.
+CrewAI keeps runtime state in five separate systems that often appear in the same execution path. This page maps those systems by the state they store, the moment they write, the moment they read, and the parts of the runtime that connect them.
 
-The important split is simple: memory holds learned content, flow persistence holds resumable flow state, the checkpoint system holds crew and flow snapshots, replay holds task output history, and caching holds tool results. Each system answers a different runtime question, so a clear map matters more than the individual configuration switches.
+The split is simple: memory holds learned content, flow persistence holds resumable flow state, the checkpoint system holds crew and flow snapshots, replay holds task output history, and caching holds tool results. Each system answers a different runtime question, so a clear map matters more than the individual configuration switches.
 
 ## Unified memory
 
-CrewAI uses one `Memory` object as the runtime memory story. That object handles save and recall in the same place, and the current code routes both paths through internal Flows: `crewai.memory.encoding_flow.EncodingFlow` handles save and `crewai.memory.recall_flow.RecallFlow` handles recall. The older split memory model does not appear in this runtime path.
+CrewAI uses one `Memory` object as the runtime memory layer. That object handles save and recall in one place, and the code routes both paths through internal Flows: `crewai.memory.encoding_flow.EncodingFlow` handles save and `crewai.memory.recall_flow.RecallFlow` handles recall. The current runtime keeps memory unified rather than splitting it into separate short-term, long-term, and entity stores.
 
-Save starts when an agent or crew hands text to memory. The `BaseAgentExecutor._save_to_memory()` path extracts memory-worthy facts from task output, then calls `Memory.remember()` or `Memory.remember_many()`. The memory object infers scope, categories, and importance during the save pipeline, and it writes the result through a pluggable backend under `crewai.memory.storage`.
+Save starts when an agent or crew hands text to memory. The `BaseAgentExecutor._save_to_memory()` path extracts relevant facts from task output, then calls `Memory.remember()` or `Memory.remember_many()`. The memory object infers scope, categories, and importance during the save pipeline, and it writes the result through a pluggable backend under `crewai.memory.storage`.
 
-Read starts when an agent calls recall or when the crew asks memory for context. The memory object first drains pending background writes, then it searches. Agents reach the same memory through injected tools from `crewai.tools.memory_tools.create_memory_tools()`, so recall and save stay available at the point of execution rather than as a separate setup step.
+Recall starts when an agent calls recall or when the crew asks memory for context. The memory object first drains pending background writes, then it searches. Agents reach the same memory through injected tools from `crewai.tools.memory_tools.create_memory_tools()`, so recall and save stay available at the point of execution rather than as a separate setup step.
 
 ## Background writes and completion ordering
 
@@ -22,11 +22,11 @@ Read starts when an agent calls recall or when the crew asks memory for context.
 
 The `@persist` decorator and the `FlowPersistence` interface form the flow-specific persistence layer in `crewai.flow.persistence.*`. The decorator only marks the flow or method for persistence; the flow engine saves state after the marked method completes.
 
-Persisted flow state carries an `id`, and the default persistence path resolves to the SQLite implementation when no backend appears in the flow definition. Restoring this state resumes a paused flow; it does not use the crew checkpoint path. That matters because the official flows concept page explains usage, while this page only maps where the runtime stores the state.
+Persisted flow state carries an `id`, and the default persistence path uses SQLite when no backend appears in the flow definition. Restoring this state resumes a paused flow; it does not use the crew checkpoint path.
 
 ## Crew checkpointing in `state/`
 
-The `state/` package owns the checkpoint story. `RuntimeState` serializes the live entity tree, the branch and parent lineage, and the execution event record, then hands that snapshot to a provider. The checkpoint config writes when the configured event fires, and the default trigger uses task completion.
+The `state/` package owns the checkpoint story. `RuntimeState` serializes the live entity tree, the branch and parent lineage, and the execution event record, then hands that snapshot to a provider. The checkpoint config writes on the configured event, and the default trigger fires on `task_completed`.
 
 `RuntimeState.from_checkpoint()` restores that snapshot, and `Crew.from_checkpoint()` rebuilds the live crew from it. The restore path brings back runtime state and event history together, then the crew rebinds execution context, memory views, and task state from the loaded snapshot. `Flow.from_checkpoint()` uses the same runtime snapshot path for flows, so the checkpoint story sits under one shared runtime model even when the restored object differs.
 
