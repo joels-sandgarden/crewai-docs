@@ -20,7 +20,7 @@ The guide has ten pages. Nine pages cover the runtime path in order, and this pa
 
 ## Who this is for
 
-This guide serves engineers who need a runtime map before they read the code. It suits readers who debug crew behavior, compare process modes, or trace how state moves across a run. It is especially useful when tracing execution order, context flow, concurrency, or state movement across a run. The pages assume code reading ability and keep the discussion at the level of system behavior, trade-offs, and data flow. They do not try to replace the product docs or turn into an API reference. Instead, they explain the concepts that shape execution and the relationships between the runtime pieces that matter most when a crew runs.
+This guide serves engineers who need a runtime map before they read the code. It suits readers who debug crew behavior, compare process modes, or trace how state moves across a run. It is especially useful when tracing execution order, context flow, concurrency, and state movement across a run. The pages assume code reading ability and keep the discussion at the level of system behavior, trade-offs, and data flow. They do not try to replace the product docs or turn into an API reference. Instead, they explain the concepts that shape execution and the relationships between the runtime pieces that matter most when a crew runs.
 
 ## How it was made
 
