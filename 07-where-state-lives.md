@@ -18,7 +18,7 @@ Recall starts when an agent calls recall or when the crew asks memory for contex
 
 `Memory.remember_many()` does not block for the whole save pipeline. It schedules the work in a background thread and returns before the write finishes, which means a crew can finish while memory events still sit in flight.
 
-`Crew._drain_memory_writes()` closes that gap before the code emits `CrewKickoffCompletedEvent`. That ordering keeps `MemorySaveCompletedEvent` and `MemorySaveFailedEvent` visible long enough for listeners to process them, so listener teardown does not swallow the final memory result. See also [05-threads-asyncio-and-the-async-barrier.md](/05-threads-asyncio-and-the-async-barrier.md) for the concurrency and async barrier model behind this drain.
+`Crew._drain_memory_writes()` closes that gap before the code emits `CrewKickoffCompletedEvent`. That ordering keeps `MemorySaveCompletedEvent` and `MemorySaveFailedEvent` visible long enough for listeners to process them, so listener teardown does not swallow the final memory result. See also [05-threads-asyncio-and-the-async-barrier.md](/05-threads-asyncio-and-the-async-barrier.md) for the concurrency and async barrier model that explains this drain.
 
 ## Flow persistence with `@persist`
 
