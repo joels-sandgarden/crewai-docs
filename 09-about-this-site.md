@@ -1,6 +1,6 @@
 # About This Site
 
-This site is a field guide to CrewAI execution semantics. It follows the path a crew takes at runtime and explains how crews, agents, tasks, processes, flows, state, and the LLM layer fit together. The focus stays on behavior in the explored codebase, not on configuration catalogs or product marketing. The result is a compact map of the system for readers who want to understand what happens when a run starts and why it settles the way it does.
+This site is a ten-page field guide to CrewAI execution semantics. It follows the path a crew takes at runtime and explains how crews, agents, tasks, processes, flows, state, and the LLM layer fit together. The focus stays on behavior in the explored codebase, not on configuration catalogs or product marketing. The result is a compact map of the system for readers who want to understand what happens when a run starts and why it settles the way it does.
 
 The guide has ten pages. Nine pages cover the runtime path in order, and this page explains the site itself. Each page stays at the concept level so the reader can move from the overview to the load-bearing parts of the code without first learning every option exposed by the public API.
 
@@ -28,6 +28,6 @@ Doc Holiday wrote this guide by reading the CrewAI source repository directly an
 
 ## Scope notes
 
-This guide reflects a snapshot of an actively developed codebase. The official docs at https://docs.crewai.com remain the authoritative reference for setup and configuration. When this guide differs from other descriptions, it records the runtime behavior visible in the explored snapshot and keeps the note neutral and constructive. It does not argue with the other descriptions; it describes what the code shows at the time of inspection. If later changes alter that behavior, this page should change with the code.
+This guide reflects a snapshot of an actively developed codebase. The official docs at https://docs.crewai.com remain the authoritative reference for setup and configuration. When this guide differs from other descriptions, it records the runtime behavior visible in the explored snapshot and frames the difference as a neutral observation about that snapshot. It does not argue with the other descriptions; it describes what the code shows at the time of inspection. If later changes alter that behavior, this page should change with the code.
 
 Corrections are welcome at [CONTACT_OR_REPO_LINK].
