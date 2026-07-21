@@ -18,7 +18,7 @@ Bare model names follow a final inference step. The factory checks the known mod
 
 `BaseLLM` in `lib/crewai/src/crewai/llms/base_llm.py` defines the runtime contract that every concrete implementation follows. It owns the common state and the shared behaviors that make the rest of the system work without provider-specific knowledge: synchronous and asynchronous calls, streaming event flow, token usage accounting, structured output validation, context window sizing, and the hooks that fire before and after a call. The base class does not act as a provider itself. It gives provider classes a common shape and a common place to emit telemetry.
 
-That contract also exposes capability predicates such as `supports_function_calling()` and `supports_multimodal()`. The agent loop (`./02-the-agent-executor-loop.md`) uses those predicates to decide whether it can take the native tool-calling path, so the LLM layer and the executor loop stay loosely coupled. When the layer reports a context window, it also sets the boundary for overflow handling; see the overflow and context management page for the behavior that follows once a call reaches that limit. The design keeps provider-specific knowledge inside the provider class and keeps orchestration logic outside it.
+That contract also exposes capability predicates such as `supports_function_calling()` and `supports_multimodal()`. The [agent loop](./02-the-agent-executor-loop.md) uses those predicates to decide whether it can take the native tool-calling path, so the LLM layer and the executor loop stay loosely coupled. When the layer reports a context window, it also sets the boundary for overflow handling; see the [state page](./07-where-state-lives.md) for the behavior that follows once a call reaches that limit. The design keeps provider-specific knowledge inside the provider class and keeps orchestration logic outside it.
 
 ## Migration story in this snapshot
 
@@ -26,7 +26,7 @@ As of this repository snapshot, the codebase sits between two routing styles. `l
 
 ## Where the LLM layer fits in runtime
 
-The executor loop (`./02-the-agent-executor-loop.md`) calls the LLM on each turn of the agent cycle. `supports_function_calling()` decides whether the agent can use the native tool-calling path, and usage data from the LLM flows into the event bus and the token usage summaries described in `./07-where-state-lives.md`. That keeps orchestration, telemetry, and provider execution on separate layers while still letting them share a single runtime object.
+The [executor loop](./02-the-agent-executor-loop.md) calls the LLM on each turn of the agent cycle. `supports_function_calling()` decides whether the agent can use the native tool-calling path, and usage data from the LLM flows into the event bus and the token usage summaries on the [state page](./07-where-state-lives.md). That keeps orchestration, telemetry, and provider execution on separate layers while still letting them share a single runtime object.
 
 ## Streaming and structured outputs
 
