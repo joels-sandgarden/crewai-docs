@@ -36,13 +36,19 @@ A task produces `TaskOutput`. The important runtime fields are `raw`, plus optio
 
 `Task._export_output` and `Task._aexport_output` shape the raw agent result into those structured forms when the agent does not already return a `BaseModel`. When the agent already returns a `BaseModel`, the task keeps that model and serializes it into the task output. `output_file` writes the final accepted task output to disk after validation succeeds, so guardrails sit in front of persistence rather than after it.
 
+That raw text also feeds the next context pass, so the crew treats it as the main handoff between tasks. The structured forms give later code a typed view of the same result when a task config asks for it.
+
 `Crew._create_crew_output` then builds the crew result from the last valid task output. It copies that task's `raw`, `pydantic`, and `json_dict` fields into `CrewOutput`, while `CrewOutput.tasks_output` keeps the full per-task history. Earlier outputs stay available on the task objects and in the collected history; they simply do not become the crew's top-level `raw` result.
+
+The crew output stays compact on purpose: it summarizes the final accepted result while preserving the full trail in `tasks_output`.
 
 ## Conditional skips
 
 `ConditionalTask.should_execute` checks the previous task output at runtime. The crew calls `check_conditional_skip` just before the task would run. If the condition returns false, `get_skipped_task_output()` creates an empty raw `TaskOutput`, and the crew records the skip path.
 
 A skipped task does not add useful text to later context accumulation because its `raw` field stays empty. The crew still records the skipped branch, so the run keeps a visible trace of the path that did not execute.
+
+Later tasks see the skip as history, not as new content, so the branch can affect logs without changing the accumulated context string.
 
 ## Guardrails and retries
 
@@ -52,9 +58,13 @@ Multiple guardrails run in order. Each guardrail receives the output produced by
 
 `LLMGuardrail` creates a validating agent and asks it to judge the task result against the guardrail description. `HallucinationGuardrail` currently acts as a no-op placeholder in the open-source repository: it logs that hallucination detection does not run there and returns the raw output unchanged.
 
+The validating agent turns the guardrail into a second judgment step, while the placeholder guardrail keeps the runtime interface stable without adding behavior.
+
 ## Inputs come first
 
 Inputs passed to `kickoff(inputs=...)` are interpolated into task descriptions and expected outputs before execution begins. The run therefore starts with inputs, carries accepted outputs forward as accumulated context, and ends with one crew result.
+
+That keeps the execution order consistent: inputs shape the prompt first, validation decides whether the result stands, and context then carries the accepted text forward.
 
 ## Where to look in the code
 
