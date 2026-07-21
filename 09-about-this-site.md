@@ -1,31 +1,33 @@
 # About This Site
 
-This field guide explains how CrewAI behaves at runtime. It focuses on execution semantics rather than API catalog details, so an engineer can understand the order of tasks, how agents iterate, how context flows forward, how concurrency joins, how flows schedule work, and where state lives. The guide exists to give a clear mental model of the codebase, not to restate the product docs or enumerate every option. It follows the runtime path from entry point to outcome, so the reader can trace what happens when a crew runs instead of inferring that path from the API surface. The page stays short and factual so it can frame the rest of the guide.
+This site is a field guide to CrewAI execution semantics. It follows the path a crew takes at runtime and explains how crews, agents, tasks, processes, flows, state, and the LLM layer fit together. The focus stays on behavior in the explored codebase, not on configuration catalogs or product marketing. The result is a compact map of the system for readers who want to understand what happens when a run starts and why it settles the way it does.
+
+The guide has ten pages. Nine pages cover the runtime path in order, and this page explains the site itself. Each page stays at the concept level so the reader can move from the overview to the load-bearing parts of the code without first learning every option exposed by the public API.
 
 ## Contents
 
 | Path | Topic |
 | --- | --- |
-| `/01-crew-run-loop.md` | Task order and the crew execution path. |
-| `/02-agent-iteration.md` | How an agent steps through work. |
-| `/03-context-flow.md` | How later tasks receive earlier results. |
-| `/04-concurrency-and-joins.md` | How async task work overlaps and settles. |
-| `/05-flow-scheduling.md` | How flows trigger methods and listeners. |
-| `/06-state-and-persistence.md` | Where flow and crew state live. |
-| `/07-memory.md` | How recall and encoding fit into execution. |
-| `/08-delegation-and-tools.md` | How tool calls shape a run. |
-| `/09-about-this-site.md` | What this guide covers and how to read it. |
+| `/00-the-big-picture.md` | The map: Crew, Agent, Task, Process, and Flow, plus the monorepo packages. |
+| `/01-anatomy-of-a-kickoff.md` | End-to-end trace of one `crew.kickoff()`. |
+| `/02-the-agent-executor-loop.md` | Inside one agent turn: the ReAct and native tool-calling loops. |
+| `/03-context-guardrails-and-retries.md` | How outputs become the next task's context, and where guardrails sit in the pipeline. |
+| `/04-the-hierarchical-process.md` | What the manager agent actually does: delegation as tools. |
+| `/05-threads-asyncio-and-the-async-barrier.md` | The concurrency model: `async_execution`, kickoff variants, and their sharp edges. |
+| `/06-the-flow-scheduler.md` | How `@start`, `@listen`, and `@router` methods are really scheduled. |
+| `/07-where-state-lives.md` | Memory, flow persistence, checkpoints, and replay. |
+| `/08-the-llm-layer.md` | The LLM factory: native provider SDKs vs the LiteLLM fallback. |
 
 ## Who this is for
 
-This guide serves engineers who adopt CrewAI, debug crew runs, or extend the framework and want the mental model behind the API. It assumes code reading ability and focuses on behavior that explains what happens during a run: how work moves from task to task, how one agent can continue after another, how concurrent tasks join back together, and where later steps find their inputs. It also helps when a run surprises someone, because it explains how ordering, context, concurrency, and flow scheduling shape the result. It does not try to teach the public API from first principles.
+This guide serves engineers who need a runtime map before they read the code. It fits readers who debug crew behavior, compare process modes, or trace how state moves across a run. The pages assume code reading ability and keep the discussion at the level of system behavior, trade-offs, and data flow. They do not try to replace the product docs or turn into an API reference.
 
 ## How it was made
 
-Doc Holiday, an AI documentation writer at https://doc.holiday, wrote this guide by exploring the CrewAI source repository directly. Every page grounds its claims in actual code, with real file paths and symbol names, as of [GENERATED_FROM]. Doc Holiday uses those paths and symbols as anchors, because the guide only claims what the source shows. If the code sits in a migration, the relevant page says so and dates the observation.
+Doc Holiday wrote this guide by reading the CrewAI source repository directly and following the runtime path through the code. Each page uses real file paths and symbol names, including [GENERATED_FROM], so the claims stay anchored in the explored snapshot. When the source shows an in-flight change or a migration, the page states that fact plainly and keeps the note dated.
 
 ## Scope notes
 
-This guide reflects a snapshot of an actively developed codebase. The official docs at https://docs.crewai.com remain the authoritative reference for setup and configuration. When this guide differs from other descriptions, it names the runtime behavior visible in the explored snapshot and keeps the note neutral and constructive. It does not argue with the other descriptions; it records the state of the code at the moment of inspection. If later changes alter that behavior, the page should change with the code. The note stays tied to the code, not to any broader product claim.
+This guide reflects a snapshot of an actively developed codebase. The official docs at https://docs.crewai.com remain the authoritative reference for setup and configuration. When this guide differs from other descriptions, it records the runtime behavior visible in the explored snapshot and keeps the note neutral and constructive. It does not argue with the other descriptions; it describes what the code shows at the time of inspection. If later changes alter that behavior, this page should change with the code.
 
 Corrections are welcome at [CONTACT_OR_REPO_LINK].
