@@ -10,7 +10,7 @@ mode: "wide"
 
 As of this repository snapshot, a crew does not hand one task result directly to the next task in a single hop. The runtime collects raw output from earlier tasks, validates the current task output after execution, and only then makes the accepted output available to later tasks.
 
-This page describes that data flow. It focuses on runtime behavior, not configuration, and uses the same task loop that sequential and hierarchical crews share.
+This page describes that data flow. It stays on runtime behavior, not configuration, and follows the same task loop that sequential and hierarchical crews share.
 
 ```mermaid
 flowchart LR
@@ -36,7 +36,7 @@ A task produces `TaskOutput`. The important runtime fields are `raw`, plus optio
 
 `Task._export_output` and `Task._aexport_output` shape the raw agent result into those structured forms when the agent does not already return a `BaseModel`. When the agent already returns a `BaseModel`, the task keeps that model and serializes it into the task output. `output_file` writes the final accepted task output to disk after validation succeeds, so guardrails sit in front of persistence rather than after it.
 
-`Crew._create_crew_output` then builds the crew result from the last valid task output. It copies that task's `raw`, `pydantic`, and `json_dict` fields into `CrewOutput`, while `CrewOutput.tasks_output` keeps the full per task history. Earlier outputs stay available on the task objects and in the collected history; they simply do not become the crew's top level `raw` result.
+`Crew._create_crew_output` then builds the crew result from the last valid task output. It copies that task's `raw`, `pydantic`, and `json_dict` fields into `CrewOutput`, while `CrewOutput.tasks_output` keeps the full per-task history. Earlier outputs stay available on the task objects and in the collected history; they simply do not become the crew's top-level `raw` result.
 
 ## Conditional skips
 
@@ -54,7 +54,7 @@ Multiple guardrails run in order. Each guardrail receives the output produced by
 
 ## Inputs come first
 
-Inputs passed to `kickoff(inputs=...)` interpolate into task descriptions and expected outputs before execution begins. The run therefore starts with inputs at the top, carries accepted outputs forward as accumulated context, and ends with one crew result.
+Inputs passed to `kickoff(inputs=...)` are interpolated into task descriptions and expected outputs before execution begins. The run therefore starts with inputs at the top, carries accepted outputs forward as accumulated context, and ends with one crew result.
 
 ## Where to look in the code
 
