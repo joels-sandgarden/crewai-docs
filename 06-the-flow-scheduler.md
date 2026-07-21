@@ -46,7 +46,7 @@ The dispatch order therefore looks like this:
 
 Only exclusive multi-event `or_()` groups enter the racing path. When the runtime sees a group that no other listener shares, it starts all members together, waits for the first successful completion, and cancels the losers. Other listeners in the same batch still run normally.
 
-That design keeps `and_()` predictable, keeps multi event `or_()` from firing twice in one cycle, and still lets mutually exclusive alternatives compete when the graph calls for it.
+That design keeps `and_()` predictable, keeps multi-event `or_()` from firing twice in one cycle, and still lets mutually exclusive alternatives compete when the graph calls for it.
 
 ## State and persistence
 
@@ -58,9 +58,9 @@ The `@persist` decorator in `lib/crewai/src/crewai/flow/persistence/decorators.p
 
 ## Crews and human feedback
 
-`lib/crewai/src/crewai/flow/runtime/_actions.py` lets a Flow method build and await a Crew through `CrewAction.run()`. The flow engine does not special case Crew internals. It simply awaits the method result, whether that result comes from a plain method body, an awaited crew, or another async action.
+`lib/crewai/src/crewai/flow/runtime/_actions.py` lets a Flow method build and await a Crew through `CrewAction.run()`. The flow engine does not treat Crew as special. It simply awaits the method result, whether that result comes from a plain method body, an awaited crew, or another async action.
 
-Human feedback follows the same scheduling model. `lib/crewai/src/crewai/flow/human_feedback.py` defines the feedback data, and `_run_human_feedback_step` in the runtime collects, collapses, and stores the result when a method asks for feedback. If the feedback path pauses execution, the runtime saves the pending feedback context and the current state, then resumes later by re entering the dispatch loop from the restored flow.
+Human feedback follows the same scheduling model. `lib/crewai/src/crewai/flow/human_feedback.py` defines the feedback data, and `_run_human_feedback_step` in the runtime collects, collapses, and stores the result when a method asks for feedback. If the feedback path pauses execution, the runtime saves the pending feedback context and the current state, then returns to the dispatch loop from the restored flow.
 
 ## Dispatch cycle
 
