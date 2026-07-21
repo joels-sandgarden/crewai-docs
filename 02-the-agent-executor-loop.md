@@ -4,7 +4,7 @@
 
 ## Two execution styles
 
-The executor follows two runtime styles: the ReAct text loop and the native tool-calling loop. It picks the native path only when the LLM reports native function-calling support and the agent has tools to use; otherwise it stays in text mode. If the native path hits an unsupported-provider error, the executor adds text tool instructions and falls back to the ReAct loop.
+The executor follows two runtime styles: the ReAct text loop and the native tool calling loop. It picks the native path only when the LLM reports native function calling support and the agent has tools to use; otherwise it stays in text mode. If the native path hits an unsupported provider error, the executor adds text tool instructions and falls back to the ReAct loop.
 
 ## The ReAct loop as a sequence of stations
 
@@ -42,7 +42,7 @@ These retries keep the loop alive without hiding the failure. The executor does 
 
 ## Native tool calling
 
-The native path handles structured tool calls instead of ReAct text. It normalizes provider-specific shapes into one internal form, then maps each call back to the original tool. When a batch contains several calls, the executor can run them through a `ThreadPoolExecutor` and collect the results in order.
+The native path handles structured tool calls instead of ReAct text. It normalizes provider specific shapes into one internal form, then maps each call back to the original tool. When a batch contains several calls, the executor can run them through a `ThreadPoolExecutor` and collect the results in order.
 
 The executor only parallelizes a batch when that batch stays safe to run together. If any call in the batch can end the turn with `result_as_answer`, or if any tool in the batch carries a usage cap, the executor keeps the calls sequential. After each call, it appends the assistant tool-call message and the tool result message back into history, then adds a short reasoning prompt so the model can decide whether to call another tool or finish.
 
@@ -52,7 +52,7 @@ The native path still honors the same exit rules as the text loop. It respects t
 
 The async path mirrors the sync path one-for-one. `ainvoke`, `_ainvoke_loop`, `_ainvoke_loop_react`, and `_ainvoke_loop_native_tools` follow the same branch points, but they call the async LLM and tool helpers instead of the sync ones. Async kickoffs and Flows use this path.
 
-Human feedback stays inside the same executor rather than opening a separate branch. `_handle_human_feedback` and `_ahandle_human_feedback` hand the final answer to the provider in `human_input.py`. The provider can prompt for another pass, append the feedback as a new message, and rerun the loop until the reviewer submits a blank response. In training mode, the provider records the initial answer, the human note, and the improved answer as one feedback pass.
+Human feedback stays inside the same executor rather than opening a separate branch. `_handle_human_feedback` and `_ahandle_human_feedback` hand the final answer to the provider in `human_input.py`. The provider can prompt for another pass, append the feedback as a new message, and rerun the loop until the reviewer submits a blank response. In training mode, the provider records the initial answer, the feedback note, and the improved answer as one feedback pass.
 
 Adjacent pages cover the outer kickoff envelope, the context rules around retries, the async barrier, and the LLM layer: [/01-anatomy-of-a-kickoff.md](/01-anatomy-of-a-kickoff.md), [/03-context-guardrails-and-retries.md](/03-context-guardrails-and-retries.md), [/05-threads-asyncio-and-the-async-barrier.md](/05-threads-asyncio-and-the-async-barrier.md), and [/08-the-llm-layer.md](/08-the-llm-layer.md).
 
