@@ -2,7 +2,7 @@
 
 This site is a ten-page field guide to CrewAI execution semantics. It follows the path a crew takes at runtime and explains how crews, agents, tasks, processes, flows, state, and the LLM layer fit together. The focus stays on behavior in the explored codebase, not on configuration catalogs or product marketing. The result is a compact map of the system for readers who want to understand what happens when a run starts, where control moves next, and why the final result settles the way it does. The guide stays intentionally narrow so the reader can move from the overview to the load-bearing parts of the code without first learning every option exposed by the public API.
 
-The guide has ten pages. Nine pages cover the runtime path in order, and this page explains the site itself. Each page stays at the concept level so the reader can see the structure of the runtime model before opening the code. That approach keeps the site useful as a guide to the repository without turning it into a catalog of every setting or a replacement for the product docs.
+The guide has ten pages. Nine pages cover the runtime path in order, and this page explains the site itself. Each page stays at the concept level so the reader can see the structure of the runtime model before opening the code. That focus keeps the site useful without turning it into a catalog of every setting or a replacement for the product docs.
 
 ## Contents
 
@@ -20,7 +20,7 @@ The guide has ten pages. Nine pages cover the runtime path in order, and this pa
 
 ## Who this is for
 
-This guide serves engineers who need a runtime map before they read the code. It fits readers who debug crew behavior, compare process modes, or trace how state moves across a run. The pages assume code reading ability and keep the discussion at the level of system behavior, trade-offs, and data flow. They do not try to replace the product docs or turn into an API reference. Instead, they explain the concepts that shape execution and the relationships between the runtime pieces that matter most when a crew runs.
+This guide serves engineers who need a runtime map before they read the code. It suits readers who debug crew behavior, compare process modes, or trace how state moves across a run. The pages assume code reading ability and keep the discussion at the level of system behavior, trade-offs, and data flow. They do not try to replace the product docs or turn into an API reference. Instead, they explain the concepts that shape execution and the relationships between the runtime pieces that matter most when a crew runs.
 
 ## How it was made
 
