@@ -16,7 +16,7 @@ The same preparation step also resets the task output handler, sets task callbac
 
 ## Process dispatch
 
-After preparation, `Crew.kickoff` chooses either `_run_sequential_process` or `_run_hierarchical_process`, and both paths funnel into `_execute_tasks` in `lib/crewai/src/crewai/crew.py`. Hierarchical execution changes which agent runs each task and when delegation tools appear, but it does not replace the scheduler itself; the task list still drives the order of execution. The process-level distinction is described in `./04-the-hierarchical-process.md`.
+After preparation, `Crew.kickoff` chooses either `_run_sequential_process` or `_run_hierarchical_process`, and both paths funnel into `_execute_tasks` in `lib/crewai/src/crewai/crew.py`. Hierarchical execution changes which agent runs each task and when delegation tools appear, but it does not replace the scheduler itself; the task list still drives the order of execution. See `./04-the-hierarchical-process.md` for that process distinction.
 
 ## The task loop
 
@@ -34,7 +34,7 @@ Async tasks enter the loop as futures, and the next synchronous task or the end 
 
 After the main process returns, kickoff runs `after_kickoff_callbacks`, passes the result through `_post_kickoff`, and then clears file inputs in the final cleanup block. On success, `_create_crew_output` dispatches the output and execution-end hooks, drains memory writes, flushes the event bus, and emits `CrewKickoffCompletedEvent`; on failure, kickoff emits `CrewKickoffFailedEvent` from the exception path.
 
-`_drain_memory_writes` exists because memory saves can still be in flight when kickoff otherwise looks finished. `Memory` in `lib/crewai/src/crewai/memory/unified_memory.py` uses a single-worker save pool, so kickoff waits for those saves before it emits completion and before listener teardown can close the event path.
+`_drain_memory_writes` exists because memory saves can still be in flight when kickoff otherwise looks finished. `Memory` in `lib/crewai/src/crewai/memory/unified_memory.py` uses a single worker save pool, so kickoff waits for those saves before it emits completion and before listener teardown can close the event path.
 
 ## Side channels
 
