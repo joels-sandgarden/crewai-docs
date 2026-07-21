@@ -1,6 +1,6 @@
- # The Single Turn Agent Executor Loop
+# The Single Turn Agent Executor Loop
 
-`CrewAgentExecutor` drives the inner loop of one agent turn. `Task` owns the outer lifecycle, `Agent` prepares the prompt and executor, and this page explains the machinery that runs inside the turn boundary. The class name remains `CrewAgentExecutor` in this path, although `Agent` now defaults to `AgentExecutor`.
+`CrewAgentExecutor` drives the inner loop of one agent turn. `Task` owns the outer lifecycle, `Agent` prepares the prompt and executor, and this page explains what happens after control enters the turn boundary. The class still names the legacy executor path, while `Agent` now defaults to `AgentExecutor`.
 
 ## Two execution styles
 
@@ -42,7 +42,7 @@ These retries keep the loop alive without hiding the failure. The executor does 
 
 ## Native tool calling
 
-The native path works with structured tool calls instead of ReAct text. It normalizes the different provider shapes into one internal form, then maps each call back to the original tool. When a batch contains several calls, the executor can run them through a `ThreadPoolExecutor` and collect the results in order.
+The native path handles structured tool calls instead of ReAct text. It normalizes provider-specific shapes into one internal form, then maps each call back to the original tool. When a batch contains several calls, the executor can run them through a `ThreadPoolExecutor` and collect the results in order.
 
 The executor only parallelizes a batch when that batch stays safe to run together. If any call in the batch can end the turn with `result_as_answer`, or if any tool in the batch carries a usage cap, the executor keeps the calls sequential. After each call, it appends the assistant tool-call message and the tool result message back into history, then adds a short reasoning prompt so the model can decide whether to call another tool or finish.
 
