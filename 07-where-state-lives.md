@@ -10,7 +10,7 @@ CrewAI uses one `Memory` object as the runtime memory layer. That object handles
 
 Save starts when an agent or crew hands text to memory. The `BaseAgentExecutor._save_to_memory()` path extracts relevant facts from task output, then calls `Memory.remember()` or `Memory.remember_many()`. The memory object infers scope, categories, and importance during the save pipeline, and it writes the result through a pluggable backend under `crewai.memory.storage`.
 
-The built-in storage backends live in `lib/crewai/src/crewai/memory/storage/lancedb_storage.py` (`LanceDBStorage`) and `lib/crewai/src/crewai/memory/storage/qdrant_edge_storage.py` (`QdrantEdgeStorage`), and `lib/crewai/src/crewai/memory/storage/factory.py` exposes `set_memory_storage_factory()` as the extension point.
+The built-in storage backends are `LanceDBStorage` in `lib/crewai/src/crewai/memory/storage/lancedb_storage.py` and `QdrantEdgeStorage` in `lib/crewai/src/crewai/memory/storage/qdrant_edge_storage.py`, and `lib/crewai/src/crewai/memory/storage/factory.py` provides `set_memory_storage_factory()` as the extension point.
 
 Recall starts when an agent calls recall or when the crew asks memory for context. The memory object first drains pending background writes, then it searches. Agents reach the same memory through injected tools from `crewai.tools.memory_tools.create_memory_tools()`, so recall and save stay available at the point of execution rather than as a separate setup step.
 
