@@ -1,10 +1,10 @@
 # The hierarchical process
 
-As of this repository snapshot, the hierarchical process gives CrewAI a manager turn, not a pre-run scheduler. It runs the same task list through a manager executor that may delegate from inside the task turn, and the sibling pages in [Anatomy of a kickoff](/01-anatomy-of-a-kickoff.md), [The agent executor loop](/02-the-agent-executor-loop.md), and [Context guardrails and retries](/03-context-guardrails-and-retries.md) cover the surrounding runtime path.
+As of this repository snapshot, the hierarchical process gives CrewAI a manager turn, not a pre-run scheduler. It runs the same task list through a manager executor that may delegate from inside the task turn, and the sibling pages in [Anatomy of a kickoff](/01-anatomy-of-a-kickoff.md), [The agent executor loop](/02-the-agent-executor-loop.md), and [Context guardrails and retries](/03-context-guardrails-and-retries.md) anchor the surrounding runtime path.
 
 ## Same task list, different executor
 
-The hierarchical process keeps task order stable. Both `Crew._run_hierarchical_process` and `Crew._run_sequential_process` call `_execute_tasks(self.tasks)`, so the crew still walks the task list in the order defined in the list.
+The hierarchical process keeps task order stable. Both `Crew._run_hierarchical_process` and `Crew._run_sequential_process` call `_execute_tasks(self.tasks)`, so the crew still walks the task list in the defined task order.
 
 The difference sits in executor choice, not in scheduling. In hierarchical mode, `Crew._get_agent_to_use` returns `self.manager_agent`, so the manager executes every task turn. The code does not reorder tasks ahead of time, and it does not preassign work to other agents before execution starts.
 
@@ -24,7 +24,7 @@ After the tool selects a coworker, it creates a `Task` for that agent and calls 
 
 ## The same delegation path appears elsewhere too
 
-The delegation tools do not belong only to the manager path. When `allow_delegation` is set, `Crew._prepare_tools` routes through `_add_delegation_tools` or `_update_manager_tools`, and those helpers call `Agent.get_delegation_tools`. In other words, hierarchical mode makes delegation the centerpiece, but it does not invent a separate mechanism.
+The same delegation tools also reach non manager agents. When `allow_delegation` is set, `Crew._prepare_tools` routes through `_add_delegation_tools` or `_update_manager_tools`, and those helpers call `Agent.get_delegation_tools`. In other words, hierarchical mode makes delegation the centerpiece, but it does not invent a separate mechanism.
 
 ## Hierarchical and sequential make different trade-offs
 
