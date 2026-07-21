@@ -2,17 +2,15 @@
 
 ## Overview
 
-CrewAI Flows read like decorators on a class, but the runtime behaves like a dispatch machine that sits underneath those decorators. The class metadata gives the engine a declarative graph of starts, listeners, routers, persistence, and human feedback, and the runtime turns that graph into scheduling decisions at execution time.
+CrewAI Flows read like decorators on a class, but `FlowMeta` makes the class object itself carry the trigger-graph metadata. The runtime treats that class shape as the source of truth for starts, listeners, routers, persistence, and human feedback, so the wiring stays declarative and inspectable instead of being discovered step by step during execution.
 
 This page covers the runtime model that the decorator reference omits. For the surface API and user-facing examples, see [Flows](/en/concepts/flows), [Mastering Flow State](/en/guides/flows/mastering-flow-state), and [Human Feedback in Flows](/en/learn/human-feedback-in-flows).
 
 ## The graph under the decorators
 
-The runtime does not guess at behavior step by step. `lib/crewai/src/crewai/flow/dsl/_utils.py` scans the wrapped methods on the Flow class, collects the stamped metadata, and builds a `FlowDefinition` from that class shape. `lib/crewai/src/crewai/flow/flow_definition.py` then gives that wiring a serializable contract: method definitions, trigger conditions, state shape, persistence settings, and human feedback settings all live in one static model.
+The runtime does not guess at behavior step by step. `lib/crewai/src/crewai/flow/dsl/_utils.py` scans the wrapped methods on the Flow class, collects the stamped metadata, and builds a static `FlowDefinition` from that class shape. `Flow.flow_definition()` in `lib/crewai/src/crewai/flow/runtime/__init__.py` materializes that definition lazily the first time code asks for it, so the graph is created on first access rather than rebuilt on every kickoff.
 
-`Flow.flow_definition()` in `lib/crewai/src/crewai/flow/runtime/__init__.py` materializes that definition lazily the first time code asks for it. That choice keeps the wiring declarative and inspectable before any instance executes, while avoiding repeated compilation work on each run.
-
-The result looks like a compiled graph, but it still comes from ordinary Python class metadata. The decorators mark intent; the runtime reads that intent once and then schedules against the resulting definition.
+The result looks like a compiled graph, but it still comes from ordinary Python class metadata. The decorators mark intent; the runtime reads that intent through the class metadata and then schedules against the resulting definition.
 
 ## `kickoff()` and `kickoff_async()`
 
