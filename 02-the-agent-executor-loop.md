@@ -18,7 +18,7 @@ The text loop moves through a fixed order.
 6. An `AgentAction` flows into tool execution, and the executor appends the observation to message history.
 7. The loop increments the counter and starts the next pass.
 
-`ToolUsage` sits under this step. It selects the closest tool name, repairs malformed arguments, checks the cache and usage limits, emits usage and error events, and can treat a tool result as the answer when a tool marks `result_as_answer`.
+`ToolUsage` sits beneath this loop and selects the closest tool name, parses and validates arguments, and handles caching, telemetry, and tool errors. It can also end the turn when a tool marks `result_as_answer`.
 
 ```mermaid
 flowchart TD
@@ -36,23 +36,21 @@ flowchart TD
 
 ## Recovery and retries
 
-`handle_context_length` controls what happens when the conversation exceeds the model window. When `respect_context_window` stays true, it compacts the message list and retries. When that flag is false, the run raises `SystemExit` and stops. `handle_output_parser_exception` follows a different path: it appends the parser error as a user message so the model can try again with format guidance.
-
-These retries keep the loop alive without hiding the failure. The executor does not silently ignore malformed output or an oversized context; it either repairs the conversation or stops the run with a clear runtime error.
+`handle_context_length` compacts and summarizes messages when `respect_context_window` is true, then retries; when that flag is false, the run stops with a `SystemExit` failure. `handle_output_parser_exception` reinjects the parser guidance as a user message, so the loop either repairs the conversation or surfaces the runtime failure.
 
 ## Native tool calling
 
-The native path handles structured tool calls instead of ReAct text. It normalizes provider specific shapes into one internal form, then maps each call back to the original tool. When a batch contains several calls, the executor can run them through a `ThreadPoolExecutor` and collect the results in order.
+The native path handles structured tool calls instead of ReAct text. `_handle_native_tool_calls` normalizes provider-specific shapes into one internal form, maps each call back to the original tool, and sends safe batches through a `ThreadPoolExecutor` when the batch can run together.
 
-The executor only parallelizes a batch when that batch stays safe to run together. If any call in the batch can end the turn with `result_as_answer`, or if any tool in the batch carries a usage cap, the executor keeps the calls sequential. After each call, it appends the assistant tool-call message and the tool result message back into history, then adds a short reasoning prompt so the model can decide whether to call another tool or finish.
+The executor keeps calls sequential when any tool in the batch can end the turn with `result_as_answer` or carries a usage cap. After each call, it appends the assistant tool-call message and the tool result message back into history, then adds a short reasoning prompt so the model can decide whether to call another tool or finish.
 
-The native path still honors the same exit rules as the text loop. It respects the iteration limit, it respects the request cap, and it falls back to text mode when the provider cannot support native function calling.
+The native path still honors the same exit rules as the text loop.
 
 ## Async and human feedback
 
 The async path mirrors the sync path one-for-one. `ainvoke`, `_ainvoke_loop`, `_ainvoke_loop_react`, and `_ainvoke_loop_native_tools` follow the same branch points, but they call the async LLM and tool helpers instead of the sync ones. Async kickoffs and Flows use this path.
 
-Human feedback stays inside the same executor rather than opening a separate branch. `_handle_human_feedback` and `_ahandle_human_feedback` hand the final answer to the provider in `human_input.py`. The provider can prompt for another pass, append the feedback as a new message, and rerun the loop until the reviewer submits a blank response. In training mode, the provider records the initial answer, the feedback note, and the improved answer as one feedback pass.
+Human feedback stays inside the same executor rather than opening a separate branch: `_handle_human_feedback` and `_ahandle_human_feedback` hand the final answer to the provider in `human_input.py`, and the provider can prompt for another pass until the reviewer submits a blank response. In training mode, the provider records the initial answer, the feedback note, and the improved answer as one feedback pass.
 
 Adjacent pages cover the outer kickoff envelope, the context rules around retries, the async barrier, and the LLM layer: [/01-anatomy-of-a-kickoff.md](/01-anatomy-of-a-kickoff.md), [/03-context-guardrails-and-retries.md](/03-context-guardrails-and-retries.md), [/05-threads-asyncio-and-the-async-barrier.md](/05-threads-asyncio-and-the-async-barrier.md), and [/08-the-llm-layer.md](/08-the-llm-layer.md).
 
