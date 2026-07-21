@@ -1,6 +1,8 @@
 # The hierarchical process
 
-As of this repository snapshot, the hierarchical process gives CrewAI a manager turn, not a pre-run scheduler. It runs the same task list through a manager executor that may delegate from inside the task turn, and the sibling pages in [Anatomy of a kickoff](/01-anatomy-of-a-kickoff.md), [The agent executor loop](/02-the-agent-executor-loop.md), and [Context guardrails and retries](/03-context-guardrails-and-retries.md) anchor the surrounding runtime path.
+ As of this repository snapshot, the hierarchical process gives CrewAI a manager turn, not a pre-run scheduler. It runs the same task list through a manager executor that may delegate from inside the task turn, and the sibling pages in [Anatomy of a kickoff](./01-anatomy-of-a-kickoff.md), [The agent executor loop](./02-the-agent-executor-loop.md), and [Context guardrails and retries](./03-context-guardrails-and-retries.md) anchor the surrounding runtime path.
+
+For configuration background, see the official docs pages for [processes](https://docs.crewai.com/en/concepts/processes), [hierarchical process](https://docs.crewai.com/en/learn/hierarchical-process), [custom manager agent](https://docs.crewai.com/en/learn/custom-manager-agent), and [sequential process](https://docs.crewai.com/en/learn/sequential-process). This page stays focused on the runtime behavior in the codebase.
 
 ## Same task list, different executor
 
@@ -44,10 +46,9 @@ flowchart TD
 
 ## Where to look in the code
 
-- `lib/crewai/src/crewai/crew.py` — chooses the process, creates the manager, runs tasks in list order, and injects delegation tools.
-- `lib/crewai/src/crewai/translations/en.json` — supplies the manager role, goal, backstory, and the tool descriptions.
-- `lib/crewai/src/crewai/tools/agent_tools/agent_tools.py` — builds the delegation tool set for a crew.
-- `lib/crewai/src/crewai/tools/agent_tools/base_agent_tools.py` — normalizes coworker names and runs the selected agent synchronously.
-- `lib/crewai/src/crewai/tools/agent_tools/delegate_work_tool.py` and `lib/crewai/src/crewai/tools/agent_tools/ask_question_tool.py` — define the two manager-facing delegation tools.
-- `lib/crewai/src/crewai/agents/crew_agent_executor.py` — drives the manager’s LLM loop and executes ordinary tools.
-- `lib/crewai/src/crewai/agent/core.py` — exposes delegation tools to agents that can delegate.
+ - `lib/crewai/src/crewai/crew.py` — chooses the process, creates the manager, and runs tasks in list order.
+ - `lib/crewai/src/crewai/translations/en.json` — supplies the manager role, goal, backstory, and tool strings.
+ - `lib/crewai/src/crewai/tools/agent_tools/agent_tools.py`, `lib/crewai/src/crewai/tools/agent_tools/delegate_work_tool.py`, and `lib/crewai/src/crewai/tools/agent_tools/ask_question_tool.py` — define the delegation tools.
+ - `lib/crewai/src/crewai/tools/agent_tools/base_agent_tools.py` — normalizes coworker names and runs the selected agent synchronously.
+ - `lib/crewai/src/crewai/agents/crew_agent_executor.py` — drives the manager’s LLM loop.
+ - `lib/crewai/src/crewai/agent/core.py` — exposes delegation tools to agents that can delegate.
