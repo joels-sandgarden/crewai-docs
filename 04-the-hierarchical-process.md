@@ -1,10 +1,10 @@
 # The hierarchical process
 
-As of this repository snapshot, the hierarchical process gives CrewAI a manager turn, not a pre-run scheduler. It runs the same task list through a manager executor that may delegate from inside the task turn, so this page explains the runtime shape without repeating the broader kickoff path covered in [Anatomy of a kickoff](/01-anatomy-of-a-kickoff.md), [The agent executor loop](/02-the-agent-executor-loop.md), and [Context guardrails and retries](/03-context-guardrails-and-retries.md).
+As of this repository snapshot, the hierarchical process gives CrewAI a manager turn, not a pre-run scheduler. It runs the same task list through a manager executor that may delegate from inside the task turn, and the sibling pages in [Anatomy of a kickoff](/01-anatomy-of-a-kickoff.md), [The agent executor loop](/02-the-agent-executor-loop.md), and [Context guardrails and retries](/03-context-guardrails-and-retries.md) cover the surrounding runtime path.
 
 ## Same task list, different executor
 
-The hierarchical process keeps task order stable. Both `Crew._run_hierarchical_process` and `Crew._run_sequential_process` call `_execute_tasks(self.tasks)`, so the crew still walks the task list in the order it was defined.
+The hierarchical process keeps task order stable. Both `Crew._run_hierarchical_process` and `Crew._run_sequential_process` call `_execute_tasks(self.tasks)`, so the crew still walks the task list in the order defined in the list.
 
 The difference sits in executor choice, not in scheduling. In hierarchical mode, `Crew._get_agent_to_use` returns `self.manager_agent`, so the manager executes every task turn. The code does not reorder tasks ahead of time, and it does not preassign work to other agents before execution starts.
 
@@ -30,7 +30,7 @@ The delegation tools do not belong only to the manager path. When `allow_delegat
 
 Hierarchical works best when the manager LLM needs to decide, task by task, whether to delegate or ask for more information. Sequential fits better when the order already exists and predictability matters more than runtime delegation.
 
-Hierarchical pays for that flexibility with extra tool and agent round-trips on each handoff, and the outcome depends on the manager’s judgment at each turn. Sequential avoids that overhead when the task list already expresses the right order.
+Hierarchical pays for that flexibility with extra tool and agent round trips on each handoff, and the outcome depends on the manager’s judgment at each turn. Sequential avoids that overhead when the task list already expresses the right order.
 
 The loop below shows the manager turn and the delegation return path.
 
