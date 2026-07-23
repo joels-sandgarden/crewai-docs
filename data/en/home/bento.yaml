@@ -1,0 +1,22 @@
+header:
+  title: Runtime mental models, not API dumps.
+  description: Each page transfers the mental model of one part of CrewAI's runtime — what it does when a crew or flow actually runs, the design decisions behind it, and how it relates to its neighbors.
+
+items:
+  - col: col-5
+    icon: bento/rocket_launch
+    title: Understand what happens at kickoff
+    description: The guide traces a crew.kickoff() end to end and opens up the machinery around it — the agent executor loop, task context, concurrency, and the flow scheduler — so you can hold the whole execution model in your head.
+    badges: [ ]
+
+  - col: col-7
+    icon: bento/extension
+    title: Grounded in the source
+    description: Every claim cites real files and symbols from the CrewAI repository, and every page ends with a "Where to look in the code" map. Where the code and the metaphor disagree, the code wins — and the page says so, dated.
+    badges: [ Crew, Agent, Task, Flow ]
+
+  - col: col-7
+    icon: bento/shield
+    title: Complements the official docs
+    description: docs.crewai.com owns installation, configuration, tutorials, and the tool catalog. This guide covers what they do not explain — the execution semantics — how tasks are ordered, how the hierarchical manager really delegates, what async_execution actually does, and how flows are scheduled.
+    badges: [ ]
